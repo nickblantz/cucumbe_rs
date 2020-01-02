@@ -1,0 +1,45 @@
+{
+  "and": [
+	"* ",
+	"En "
+  ],
+  "background": [
+	"Agtergrond"
+  ],
+  "but": [
+	"* ",
+	"Maar "
+  ],
+  "examples": [
+	"Voorbeelde"
+  ],
+  "feature": [
+	"Funksie",
+	"Besigheid Behoefte",
+	"Vermoë"
+  ],
+  "given": [
+	"* ",
+	"Gegewe "
+  ],
+  "name": "Afrikaans",
+  "native": "Afrikaans",
+  "rule": [
+	"Rule"
+  ],
+  "scenario": [
+	"Voorbeeld",
+	"Situasie"
+  ],
+  "scenarioOutline": [
+	"Situasie Uiteensetting"
+  ],
+  "then": [
+	"* ",
+	"Dan "
+  ],
+  "when": [
+	"* ",
+	"Wanneer "
+  ]
+}
