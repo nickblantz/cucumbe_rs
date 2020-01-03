@@ -1,54 +1,85 @@
 use std::iter::Iterator;
 use std::iter::Peekable;
 use std::str::Chars;
+use std::io::{self, prelude::*, BufReader};
 
-const CARRIAGE_RETURN: u8 = '\n' as u8;
+type Location = (usize, usize);
 
-pub struct InputStream {
-    index: usize,
-    length: usize,
-    data: Vec<u8>,
-    position: (usize, usize),
+pub struct GherkinLine {
+    line_text: String,
+    line_number: usize,
+    indent: usize,
 }
 
-impl InputStream {
-    pub fn from_string(input: &String) -> InputStream {
-        InputStream { 
-            index: 0,
-            length: input.len(),
-            data: input.as_bytes().to_vec(),
-            position: (1,1), 
+pub struct Token {
+    line: GherkinLine,
+    location: Location,
+}
+
+pub struct TokenScanner<R: Read> {
+    pub line_number: usize,
+    pub buf_reader: BufReader<R>,
+}
+
+impl GherkinLine {
+    pub fn new(line_text: &str, line_number: usize) -> GherkinLine {
+        let full_size: usize = line_text.len();
+        let trimmed_size: usize = line_text.trim_start().trim_end().len();
+        GherkinLine {
+            line_text: String::from(line_text.trim_start().trim_end()),
+            line_number: line_number,
+            indent: full_size - trimmed_size,
         }
     }
 
-    pub fn get_position(&self) -> (usize, usize) { self.position }
+    pub fn starts_with(&self, pat: &str) -> bool {
+        self.line_text.starts_with(pat)
+    }
 
-    pub fn next(&mut self) -> Option<Box<u8>> {
-        
-        match self.peek() {
-            Some(b) => {
-                match *b {
-                    CARRIAGE_RETURN => {
-                        self.position.0 += 1;
-                        self.position.1 = 1;
-                    },
-                    _ => { self.position.1 += 1; },
-                }
-                Some(b)
-            },
-            None => { None },
+    pub fn is_empty(&self) -> bool {
+        self.line_text.is_empty()
+    }
+
+    pub fn get_content(&self) -> &str {
+        &self.line_text
+    }
+
+    pub fn get_content_after(&self, pat: &str) -> &str {
+        self.line_text.trim_start_matches(pat)
+    }
+}
+
+impl Token {
+    pub fn new(line: GherkinLine, location: Location) -> Token {
+        Token {
+            line: line,
+            location: location,
+        }
+    }
+
+    pub fn get_token_value(&self) -> &str {
+        self.line.get_content()
+    }
+}
+
+impl<R: Read> TokenScanner<R> {
+    pub fn new(reader: R) -> TokenScanner<R> {
+        TokenScanner {
+            line_number: 0,
+            buf_reader: BufReader::new(reader),
         }
     }
     
-    pub fn peek(&mut self) -> Option<Box<u8>> {
-        if self.index > self.length {
-            return Some(Box::new(self.data[self.index]));
-        } else {
-            return None;
+    pub fn next_token(&self) -> Option<Token> {
+        let mut line: String;
+        match self.buf_reader.read_line(&mut line) {
+            Ok(_) => { Some(
+                Token {
+                    line: GherkinLine::new(&line, self.line_number),
+                    location: (self.line_number, 0),
+                })
+            },
+            Err(e) => { None },
         }
-    }
-
-    pub fn is_eof(&mut self) -> bool {
-        self.peek().is_none()
     }
 }
