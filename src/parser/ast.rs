@@ -21,17 +21,16 @@ impl AstNode {
         }
     }
 
-    pub fn new_empty() {
-
-    }
-    
-    fn to_array() -> AstNodeArrayOfRules {
-
+    pub fn add(&mut self, rule: Rule, node: AstNode) {
+        match self.children[rule.to_usize()] {
+            Some(node_list) => { node_list.asMut().push(node) },
+            None => { self.children[rule.to_usize()] = Some(vec![node]) }
+        }
     }
 }
 
 impl AstBuilder {
-    pub fn new(id_generator: Some<()>) {
+    pub fn new(id_generator: Option<()>) -> AstBuilder {
         AstBuilder {
             id_generator: id_generator,
             stack: vec![AstNode::new(Rule::None)],
@@ -45,12 +44,13 @@ impl AstBuilder {
     }
 
     pub fn start_rule(&mut self, rule: Rule) {
-        self.comments.push(rule);
+        self.stack.push(AstNode::new(rule));
     }
 
     pub fn end_rule(&mut self) {
-        let node = stack.pop();
-        let x: str = 4;
+        // let node = self.stack.pop();
+        // self.stack.last.add(node.rule, )
+        // let x: str = 4;
         // let test = Vec::default();
         // test.first()
 

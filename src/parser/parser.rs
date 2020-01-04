@@ -41,6 +41,43 @@ pub enum Rule {
 }
 
 impl Rule {
+    pub fn from_usize(i: usize) -> Rule {
+        match i {
+             0 => Rule::None,
+             1 => Rule::EOF,
+             2 => Rule::Empty,
+             3 => Rule::Comment,
+             4 => Rule::TagLine,
+             5 => Rule::FeatureLine,
+             6 => Rule::RuleLine,
+             7 => Rule::BackgroundLine,
+             8 => Rule::ScenarioLine,
+             9 => Rule::ExamplesLine,
+            10 => Rule::StepLine,
+            11 => Rule::DocStringSeparator,
+            12 => Rule::TableRow,
+            13 => Rule::Language,
+            14 => Rule::Other,
+            15 => Rule::GherkinDocument,
+            16 => Rule::Feature,
+            17 => Rule::FeatureHeader,
+            18 => Rule::Rule,
+            19 => Rule::RuleHeader,
+            20 => Rule::Background,
+            21 => Rule::ScenarioDefinition,
+            22 => Rule::Scenario,
+            23 => Rule::ExamplesDefinition,
+            24 => Rule::Examples,
+            25 => Rule::ExamplesTable,
+            26 => Rule::Step,
+            27 => Rule::StepArg,
+            28 => Rule::DataTable,
+            29 => Rule::DocString,
+            30 => Rule::Tags,
+            31 => Rule::DescriptionHelper,
+            32 => Rule::Description,
+        }
+    }
     pub fn to_usize(&self) -> usize {
         match *self {
             Rule::None => 0,
