@@ -1,3 +1,4 @@
+use crate::parser::dialect::Dialect;
 use std::iter::Iterator;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -5,30 +6,35 @@ use std::io::{self, prelude::*, BufReader};
 
 type Location = (usize, usize);
 
+const DEFAULT_DIALECT: &str = &"en";
+
 pub struct GherkinLine {
     line_text: String,
     line_number: usize,
-    indent: usize,
+    indent_position: usize,
 }
 
 pub struct Token {
-    line: GherkinLine,
+    pub line: GherkinLine,
     location: Location,
 }
 
-pub struct TokenScanner<R: Read> {
+pub struct GherkinBuffer<R: Read> {
     pub line_number: usize,
     pub buf_reader: BufReader<R>,
 }
 
+pub struct TokenMatcher {
+    dialect: Dialect,
+    active_doc_string: bool
+}
+
 impl GherkinLine {
     pub fn new(line_text: &str, line_number: usize) -> GherkinLine {
-        let full_size: usize = line_text.len();
-        let trimmed_size: usize = line_text.trim_start().trim_end().len();
         GherkinLine {
-            line_text: String::from(line_text.trim_start().trim_end()),
+            line_text: String::from(line_text.trim_end()),
             line_number: line_number,
-            indent: full_size - trimmed_size,
+            indent_position: line_text.len() - line_text.trim_start().len(),
         }
     }
 
@@ -41,12 +47,18 @@ impl GherkinLine {
     }
 
     pub fn get_content(&self) -> &str {
+        &self.line_text.trim_start()
+    }
+
+    pub fn get_content_indented(&self) -> &str {
         &self.line_text
     }
 
     pub fn get_content_after(&self, pat: &str) -> &str {
         self.line_text.trim_start_matches(pat)
     }
+
+    // data table stuff
 }
 
 impl Token {
@@ -57,29 +69,53 @@ impl Token {
         }
     }
 
-    pub fn get_token_value(&self) -> &str {
+    pub fn get_value(&self) -> &str {
         self.line.get_content()
     }
 }
 
-impl<R: Read> TokenScanner<R> {
-    pub fn new(reader: R) -> TokenScanner<R> {
-        TokenScanner {
+impl<R: Read> GherkinBuffer<R> {
+    pub fn new(reader: R) -> GherkinBuffer<R> {
+        GherkinBuffer {
             line_number: 0,
             buf_reader: BufReader::new(reader),
         }
     }
     
-    pub fn next_token(&self) -> Option<Token> {
-        let mut line: String;
-        match self.buf_reader.read_line(&mut line) {
-            Ok(_) => { Some(
-                Token {
-                    line: GherkinLine::new(&line, self.line_number),
-                    location: (self.line_number, 0),
-                })
-            },
+    pub fn next_line(&mut self) -> Option<GherkinLine> {
+        let mut line: String = String::with_capacity(64);
+        match &self.buf_reader.read_line(&mut line) {
+            Ok(_) => { Some(GherkinLine::new(&line, self.line_number)) },
             Err(e) => { None },
         }
+    }
+}
+
+impl TokenMatcher {
+    pub fn new(dialect: &str) -> TokenMatcher {
+        TokenMatcher {
+            dialect: Dialect::new(dialect),
+            active_doc_string: false,
+        }
+    }
+
+    pub fn match_tag_line(&self, token: Token) -> bool {
+        token.line.starts_with("@")
+    }
+
+    pub fn match_feature_line(&self, token: Token) -> bool {
+        let mut result = false;
+        for keyword in &self.dialect.feature {
+            result |= token.line.starts_with(&keyword)
+        }
+        result
+    }
+
+    pub fn match_rule_line(&self, token: Token) -> bool {
+        token.line.starts_with("@")
+    }
+
+    pub fn next_token() -> Option<Token> {
+        None
     }
 }

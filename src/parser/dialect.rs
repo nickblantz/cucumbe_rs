@@ -21,7 +21,7 @@ pub struct Dialect {
 }
 
 impl Dialect {
-    pub fn dialect_of(locale: &str) -> Dialect {
+    pub fn new(locale: &str) -> Dialect {
         let config_file_name = format!("resources/dialects/{}.json", locale);
         let mut dialect_config_file = File::open(config_file_name).unwrap();
         let mut config_contents = String::new();

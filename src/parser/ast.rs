@@ -1,40 +1,64 @@
-pub enum Rule {
-    None,
-    EOF,                // #EOF
-    Empty,              // #Empty
-    Comment,            // #Comment
-    TagLine,            // #TagLine
-    FeatureLine,        // #FeatureLine
-    RuleLine,           // #RuleLine
-    BackgroundLine,     // #BackgroundLine
-    ScenarioLine,       // #ScenarioLine
-    ExamplesLine,       // #ExamplesLine
-    StepLine,           // #StepLine
-    DocStringSeparator, // #DocStringSeparator
-    TableRow,           // #TableRow
-    Language,           // #Language
-    Other,              // #Other
-    GherkinDocument,    // GherkinDocument! := Feature?
-    Feature,            // Feature! := FeatureHeader Background? ScenarioDefinition* Rule*
-    FeatureHeader,      // FeatureHeader! := #Language? Tags? #FeatureLine DescriptionHelper
-    Rule,               // Rule! := RuleHeader Background? ScenarioDefinition*
-    RuleHeader,         // RuleHeader! := #RuleLine DescriptionHelper
-    Background,         // Background! := #BackgroundLine DescriptionHelper Step*
-    ScenarioDefinition, // ScenarioDefinition! := Tags? Scenario
-    Scenario,           // Scenario! := #ScenarioLine DescriptionHelper Step* ExamplesDefinition*
-    ExamplesDefinition, // ExamplesDefinition! [#Empty|#Comment|#TagLine-&gt;#ExamplesLine] := Tags? Examples
-    Examples,           // Examples! := #ExamplesLine DescriptionHelper ExamplesTable?
-    ExamplesTable,      // ExamplesTable! := #TableRow #TableRow*
-    Step,               // Step! := #StepLine StepArg?
-    StepArg,            // StepArg := (DataTable | DocString)
-    DataTable,          // DataTable! := #TableRow+
-    DocString,          // DocString! := #DocStringSeparator #Other* #DocStringSeparator
-    Tags,               // Tags! := #TagLine+
-    DescriptionHelper,  // DescriptionHelper := #Empty* Description? #Comment*
-    Description,        // Description! := #Other+
-}
+use crate::parser::parser::{Rule, RULE_LENGTH};
+
+type AstNodeArrayOfRules = [Option<Vec<AstNode>>; RULE_LENGTH];
 
 pub struct AstNode {
-    rule: Rule,
-    children: Vec<AstNode>,
+    pub rule: Rule,
+    pub children: AstNodeArrayOfRules
+}
+
+pub struct AstBuilder {
+    id_generator: Option<()>,
+    stack: Vec<AstNode>,
+    comments: Vec<String>
+}
+
+impl AstNode {
+    pub fn new(rule: Rule) -> AstNode {
+        AstNode {
+            rule: rule,
+            children: [None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None]
+        }
+    }
+
+    pub fn new_empty() {
+
+    }
+    
+    fn to_array() -> AstNodeArrayOfRules {
+
+    }
+}
+
+impl AstBuilder {
+    pub fn new(id_generator: Some<()>) {
+        AstBuilder {
+            id_generator: id_generator,
+            stack: vec![AstNode::new(Rule::None)],
+            comments: Vec::<String>::new()
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.stack = vec![AstNode::new(Rule::None)];
+        self.comments = Vec::<String>::new();
+    }
+
+    pub fn start_rule(&mut self, rule: Rule) {
+        self.comments.push(rule);
+    }
+
+    pub fn end_rule(&mut self) {
+        let node = stack.pop();
+        let x: str = 4;
+        // let test = Vec::default();
+        // test.first()
+
+        // current_node.add(node.rule_type, transform_node(node))
+    }
+
+    
+
+
+
 }
